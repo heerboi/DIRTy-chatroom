@@ -51,7 +51,7 @@ function joinRoom(socket, room) {
                 {
                     usersInRoomSummary += ", ";
                 }
-                usersInRoomSummary += nickNames[socket.id];
+                usersInRoomSummary += nickNames[userSocketId];
             }
         }
         usersInRoomSummary += '.';
@@ -98,5 +98,20 @@ function handleMessageBroadcasting(socket) {
         socket.broadcast.to(message.room).emit('message', {
             text: nickNames[socket.id] + ": " + message.text
         });
+    });
+}
+
+function handleRoomJoining(socket) {
+    socket.on('join', function(room) {
+        socket.leave(currentRoom[socket.id]);
+        joinRoom(socket, room.newRoom);
+    });
+}
+
+function handleClientDisconnection(socket) {
+    socket.on('disconnect', function() {
+        var nameIndex = namesUsed.indexOf(nickNames[socket.id]);
+        delete namesUsed[nameIndex];
+        delete nickNames[socket.id];
     });
 }
